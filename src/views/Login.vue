@@ -42,7 +42,7 @@ import { ElMessage } from "element-plus";
 // import { useAuthStore } from "../store";
 // import { userType } from "../utils/types";
 
-// const router = useRouter();
+const router = useRouter();
 // const store = useAuthStore();
 
 const user = reactive({
@@ -53,7 +53,11 @@ const user = reactive({
 const login = (e) => {
   e.preventDefault();
   if (user.username === "Mike" && user.password === "mike") {
-    alert("sucess");
+    ElMessage({
+      message: "登录成功.",
+      type: "success",
+    });
+    router.push("/home");
   }
 };
 
