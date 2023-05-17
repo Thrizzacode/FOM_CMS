@@ -87,7 +87,6 @@
 import Sidebar from "../components/Sidebar.vue";
 import Header from "../components/Header.vue";
 import { onMounted, ref, reactive } from "vue";
-import moment from "moment-timezone";
 // import axios from "../utils/http";
 import { useNow, useDateFormat } from "@vueuse/core";
 
@@ -153,38 +152,6 @@ onMounted(() => {
 
   option && myChart.setOption(option);
 });
-
-//设定弹窗公告时间约定时间
-const curTime = new Date().getTime();
-const startDate = curTime - 30 * 3600 * 24 * 1000;
-const lastTime = moment.tz(startDate, "Asia/Taipei").format("yyyy-MM-DD");
-const time1 = Date.parse(lastTime);
-// const testData: any= reactive([]);
-
-//设定一进入页面直接render公告内容
-// onMounted(async () => {
-//   try {
-//     await axios.get("/api/announcement").then((res) => {
-//       res.data.forEach((item) => {
-//         tableData.push(item);
-//       });
-//       for (let i = 0; i < res.data.length; i++) {
-//         const item = res.data[i];
-//         const date = item.date;
-//         const resDate = Date.parse(date);
-//         // console.log(typeof resDate);
-//         // console.log(time1);
-//         // console.log(resDate);
-//         if (resDate > time1) {
-//           dialogData.push(item);
-//           // console.log(true);
-//         }
-//       }
-//     });
-//   } catch (error) {
-//     console.log(error);
-//   }
-// });
 </script>
 
 <style lang="scss" scoped>
