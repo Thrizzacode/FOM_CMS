@@ -17,7 +17,7 @@
           </el-icon>
           <span>首頁</span>
         </el-menu-item>
-        <el-menu-item index="merchant">
+        <el-menu-item index="order">
           <el-icon><icon-menu /></el-icon>
           <span>訂單管理</span>
         </el-menu-item>
@@ -56,11 +56,15 @@
           <span>會議報告</span>
         </el-menu-item> -->
       </el-menu>
+      <!-- <UseDark v-slot="{ isDark, toggleDark }">
+        <button @click="toggleDark()">Is Dark: {{ isDark }}</button>
+      </UseDark> -->
+      <el-switch class="dark-switch" size="large" v-model="isDark" />
     </el-col>
   </el-aside>
 </template>
 
-<script setup lang="ts">
+<script setup>
 import {
   Menu as IconMenu,
   HomeFilled,
@@ -69,6 +73,11 @@ import {
   TrendCharts,
   Management,
 } from "@element-plus/icons-vue";
+import { UseDark } from "@vueuse/components";
+import { useDark, useToggle } from "@vueuse/core";
+
+const isDark = useDark();
+const toggleDark = useToggle(isDark);
 //import store identity
 // import { storeToRefs } from "pinia";
 // import { useAuthStore } from "../store";
@@ -91,7 +100,8 @@ import {
 .aside {
   height: 100vh;
   background-color: #f4e1fa;
-  box-shadow: 10px 0 5px#333;
+  box-shadow: 5px 0 20px rgba(#333, 0.3);
+  position: relative;
 
   .side-title {
     color: #333;
@@ -108,6 +118,18 @@ import {
 
   .el-menu-vertical-demo {
     border-right: none;
+  }
+
+  .dark-switch {
+    position: absolute;
+    bottom: 10px;
+    right: 20px;
+  }
+}
+
+html.dark {
+  .aside {
+    background-color: #333;
   }
 }
 </style>

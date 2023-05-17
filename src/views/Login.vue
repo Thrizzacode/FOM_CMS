@@ -130,6 +130,7 @@ body {
 }
 /**/
 .main {
+  margin: 0 auto;
   position: relative;
   width: 1000px;
   min-width: 1000px;

@@ -6,7 +6,8 @@
         <Header />
         <el-main class="main" justify="center">
           <h1 class="homeTitle">歡迎進入FOM CSM</h1>
-          <el-row style="width: 100%; height: 250px">
+          <h2>現在時間: {{ timeNow }}</h2>
+          <el-row style="width: 100%; height: 220px">
             <el-col :span="12" style="padding-top: 50px">
               <el-row justify="center">
                 <el-col :span="8" class="center">
@@ -29,7 +30,7 @@
             <el-col :span="12">
               <h1 class="homeTitle2">最新公告内容</h1>
               <div class="homeList">
-                <el-table :data="tableData" border class="wikiTable">
+                <el-table :data="announcementData" border>
                   <el-table-column
                     align="center"
                     prop="date"
@@ -41,8 +42,32 @@
               </div>
             </el-col>
           </el-row>
+          <el-row style="width: 100%; flex-direction: column" justify="center">
+            <h1 style="text-align: center">每日營收統計</h1>
+            <div id="charts"></div>
+          </el-row>
+          <el-row
+            style="width: 100%; height: 250px; padding: 0 30px; margin: 20px 0"
+          >
+            <h1>最新訂單</h1>
+            <el-table :data="orderData" border>
+              <el-table-column
+                align="center"
+                prop="orderNumber"
+                label="訂單編號"
+                width="150px"
+              />
+              <el-table-column
+                align="center"
+                prop="orderContent"
+                label="訂單內容"
+              />
+              <el-table-column align="center" prop="purchaser" label="訂購人" />
+              <el-table-column align="center" prop="status" label="訂單狀態" />
+            </el-table>
+          </el-row>
           <el-dialog v-model="dialogTableVisible" title="最新公告内容">
-            <el-table :data="dialogData" border class="wikiTable">
+            <el-table :data="announcementData" border>
               <el-table-column
                 align="center"
                 prop="date"
@@ -52,11 +77,6 @@
               <el-table-column align="center" prop="content" label="內容" />
             </el-table>
           </el-dialog>
-          <!-- 測試用 -->
-          <!-- <el-table :data="testData" border>
-            <el-table-column align="center" prop="test.a" label="a" />
-            <el-table-column align="center" prop="test.b" label="b" />
-          </el-table> -->
         </el-main>
       </el-container>
     </el-container>
@@ -69,10 +89,70 @@ import Header from "../components/Header.vue";
 import { onMounted, ref, reactive } from "vue";
 import moment from "moment-timezone";
 // import axios from "../utils/http";
+import { useNow, useDateFormat } from "@vueuse/core";
+
+import * as echarts from "echarts/core";
+import { GridComponent } from "echarts/components";
+import { LineChart } from "echarts/charts";
+import { UniversalTransition } from "echarts/features";
+import { CanvasRenderer } from "echarts/renderers";
+
+echarts.use([GridComponent, LineChart, CanvasRenderer, UniversalTransition]);
 
 const dialogTableVisible = ref(true);
-const tableData: any = reactive([]);
-const dialogData: any = reactive([]);
+const chartContainer = ref(null);
+const timeNow = useDateFormat(useNow(), "YYYY-MM-DD HH:mm:ss");
+
+//table內容
+const announcementData: any = reactive([
+  {
+    date: "2023-05-17",
+    content: "This is a test",
+  },
+]);
+const orderData: any = reactive([
+  {
+    orderNumber: "FOM20230517",
+    orderContent: "apple,banana",
+    purchaser: "Mike",
+    status: "準備中",
+  },
+]);
+
+//charts內容
+onMounted(() => {
+  var chartDom = document.getElementById("charts");
+  var myChart = echarts.init(chartDom);
+  var option;
+
+  option = {
+    xAxis: {
+      type: "category",
+      data: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
+    },
+    yAxis: {
+      name: "金額",
+      type: "value",
+      axisLabel: {
+        formatter: (value) => "$" + value, // 在数值前加上 "$" 符号
+      },
+    },
+    series: [
+      {
+        data: [18520, 13899, 8224, 9218, 7135, 12147, 22260],
+        type: "line",
+        label: {
+          show: true, // 显示标签
+          position: "top", // 标签位置（可根据需要调整）
+          formatter: "${c}", // 显示数值
+        },
+      },
+    ],
+    backgroundColor: "#fff",
+  };
+
+  option && myChart.setOption(option);
+});
 
 //设定弹窗公告时间约定时间
 const curTime = new Date().getTime();
@@ -108,14 +188,32 @@ const time1 = Date.parse(lastTime);
 </script>
 
 <style lang="scss" scoped>
+.dark {
+  background-color: #333;
+}
+#charts {
+  width: 80%;
+  height: 250px;
+  margin: 0 auto;
+}
+.common-layout {
+  width: 100%;
+}
 .content {
   width: calc(100% - 250px);
+  // .el-main.main {
+  //   background-color: #e8e5e5;
+
+  //   /* 根据 Dark Mode 的状态设置背景颜色 */
+  //   background-color: var(--el-background-color, #333);
+  // }
 
   .main {
     background-color: #e8e5e5;
     padding: 0;
     display: flex;
-    // justify-content: center;
+    width: 100%;
+    justify-content: center;
     align-items: center;
     flex-direction: column;
   }
@@ -149,5 +247,12 @@ const time1 = Date.parse(lastTime);
   display: flex;
   justify-content: center;
   align-items: center;
+}
+
+html.dark {
+  .main {
+    background-color: #555;
+    color: #fff;
+  }
 }
 </style>

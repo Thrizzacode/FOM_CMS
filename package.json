@@ -10,6 +10,9 @@
     "lint": "eslint . --ext .vue,.js,.jsx,.cjs,.mjs --fix --ignore-path .gitignore"
   },
   "dependencies": {
+    "@vueuse/components": "^10.1.2",
+    "@vueuse/core": "^10.1.2",
+    "echarts": "^5.4.2",
     "element-plus": "^2.3.4",
     "pinia": "^2.0.36",
     "vue": "^3.3.2",
