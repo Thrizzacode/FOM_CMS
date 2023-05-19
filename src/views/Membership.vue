@@ -145,30 +145,25 @@ import Sidebar from "../components/Sidebar.vue";
 import Header from "../components/Header.vue";
 import axios from "axios";
 // import axios from "../utils/http";
-import { ref, watchEffect } from "vue";
+import { ref, onMounted, watchEffect, toRefs } from "vue";
 import { ElMessage } from "element-plus";
 import { Refresh } from "@element-plus/icons-vue";
 
-const dialogFormVisible = ref(false);
-const tableData = ref([
-  {
-    id: 20230519001,
-    name: "劉大帥",
-    phone: "0912345678",
-    address: "台北市大大區小小路5487號",
-  },
-]);
-const allTableData = ref([]);
-const filterTableData = ref([]);
-const show = ref(false);
-const showr = ref(false);
-const showd = ref(false);
-const editData = ref();
-const contentData = ref();
-const rowData = ref();
-const columnData = ref();
-const centerDialogVisible = ref(false);
-let deleteIn = ref({});
+const tableData = ref([]);
+
+const fetchMember = async () => {
+  try {
+    const { data } = await axios.get(import.meta.env.VITE_GET_MEMBERSHIP_API);
+    console.log(data);
+    tableData.value = data;
+    console.log(tableData.value);
+    setPageinations();
+  } catch (error) {
+    console.log(error);
+  }
+};
+
+onMounted(fetchMember);
 
 //分頁配置設定
 const page_index = ref(1), //現在在哪裡一頁
