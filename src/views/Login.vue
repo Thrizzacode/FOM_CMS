@@ -33,10 +33,11 @@
   </div>
 </template>
 
-<script setup lang="ts">
+<script setup>
 import { reactive } from "vue";
 import { useRouter } from "vue-router";
 import { ElMessage } from "element-plus";
+import axios from "axios";
 // import jwt_decode from "jwt-decode";
 // import axios from "../utils/http";
 // import { useAuthStore } from "../store";
@@ -50,19 +51,34 @@ const user = reactive({
   password: "",
 });
 
-const login = (e) => {
-  e.preventDefault();
-  if (user.username === "Mike" && user.password === "mike") {
+const login = async (e) => {
+  try {
+    e.preventDefault();
+    await axios
+      .post(import.meta.env.VITE_LOGIN_API, {
+        username: user.username,
+        password: user.password,
+      })
+      .then((res) => {
+        console.log(res.data);
+        if (res.data.status === 200) {
+          ElMessage({
+            message: "登錄成功.",
+            type: "success",
+          });
+          router.push("/home");
+        }
+      });
+  } catch (error) {
+    console.log(error);
     ElMessage({
-      message: "登录成功.",
-      type: "success",
+      message: "請檢查帳號及密碼是否正確.",
+      type: "error",
     });
-    router.push("/home");
   }
 };
 
-// console.log(import.meta.env.VITE_TEST);
-//登入api
+// console.log(import.meta.env.VITE_TEST); //登入api
 // const getLoginApi = async () => {
 //   try {
 //     await axios

@@ -10,27 +10,13 @@
               <el-form :inline="true">
                 <el-form-item class="inpNum">
                   <el-input
-                    v-model="caseNumberValue"
-                    placeholder="請輸入要查詢的訂單編號"
+                    v-model="membershipID"
+                    placeholder="請輸入要查詢的會員ID"
                     style="width: 180px"
                     clearable
                   />
                 </el-form-item>
-                <el-form-item label="選擇時間" class="timeSort">
-                  <el-date-picker
-                    v-model="startTime"
-                    type="datetime"
-                    placeholder="選擇查詢開始時間"
-                    style="width: 190px"
-                  ></el-date-picker>
-                  --
-                  <el-date-picker
-                    v-model="endTime"
-                    type="datetime"
-                    style="width: 190px"
-                    placeholder="選擇查詢結束時間"
-                  ></el-date-picker>
-                </el-form-item>
+
                 <el-form-item class="status">
                   <el-select
                     clearable
@@ -45,20 +31,13 @@
                     <el-option label="已出貨" value="已出貨" />
                   </el-select>
                 </el-form-item>
-                <el-form-item class="sort">
+                <el-form-item class="search">
                   <el-button type="primary" @click="sort">查詢</el-button>
                 </el-form-item>
-                <el-form-item class="download">
-                  <el-button
-                    type="primary"
-                    :icon="Download"
-                    @click="downloadDetail"
-                    >下載</el-button
-                  >
-                </el-form-item>
+
                 <el-form-item>
                   <el-button type="success" @click="orderAdd"
-                    >新增訂單</el-button
+                    >新增會員</el-button
                   >
                 </el-form-item>
                 <el-form-item>
@@ -77,22 +56,18 @@
             >
               <el-table-column
                 align="center"
-                prop="orderDate"
-                label="訂單日期"
+                prop="id"
+                label="會員ID"
                 width="200"
               />
               <el-table-column
                 align="center"
-                prop="orderNumber"
-                label="訂單編號"
+                prop="name"
+                label="會員名稱"
                 width="200"
               />
-              <el-table-column align="center" prop="purchaser" label="訂購人" />
-              <el-table-column
-                align="center"
-                prop="orderContent"
-                label="訂單內容"
-              />
+              <el-table-column align="center" prop="phone" label="電話" />
+              <el-table-column align="center" prop="address" label="地址" />
               <el-table-column
                 label="編輯"
                 align="center"
@@ -168,19 +143,19 @@
 <script setup>
 import Sidebar from "../components/SideBar.vue";
 import Header from "../components/Header.vue";
+import axios from "axios";
 // import axios from "../utils/http";
 import { ref, watchEffect } from "vue";
 import { ElMessage } from "element-plus";
-import { Download, Refresh } from "@element-plus/icons-vue";
-// import { Workbook } from "exceljs";
+import { Refresh } from "@element-plus/icons-vue";
 
 const dialogFormVisible = ref(false);
 const tableData = ref([
   {
-    orderDate: "2023-05-18",
-    orderNumber: "FOM20230518",
-    purchaser: "Mike",
-    orderContent: "熱狗，爆米花",
+    id: 20230519001,
+    name: "劉大帥",
+    phone: "0912345678",
+    address: "台北市大大區小小路5487號",
   },
 ]);
 const allTableData = ref([]);
@@ -208,7 +183,7 @@ const startTime = ref();
 const endTime = ref();
 const productTypeValue = ref();
 const statusValue = ref();
-const caseNumberValue = ref();
+const membershipID = ref();
 
 //表格資訊
 // const getProfiles = async () => {
@@ -303,7 +278,7 @@ const sort = () => {
     !endTime.value &&
     !productTypeValue.value &&
     !statusValue.value &&
-    !caseNumberValue.value
+    !membershipID.value
   ) {
     ElMessage({
       type: "warning",
@@ -325,7 +300,7 @@ const sort = () => {
   //多條件選擇
   const ptvalue = productTypeValue.value ? productTypeValue.value : null;
   const caseStatus = statusValue.value ? statusValue.value : null;
-  const serialNum = caseNumberValue.value ? caseNumberValue.value : null;
+  const serialNum = membershipID.value ? membershipID.value : null;
   const stime = startTime.value ? startTime.value.getTime() : null;
   const etime = endTime.value ? endTime.value.getTime() : null;
   allTableData.value = filterTableData.value.filter((item) => {
@@ -363,7 +338,7 @@ const sort = () => {
 //   ];
 //   const ptvalue = productTypeValue.value ? productTypeValue.value : null;
 //   const caseStatus = statusValue.value ? statusValue.value : null;
-//   const serialNum = caseNumberValue.value ? caseNumberValue.value : null;
+//   const serialNum = membershipID.value ? membershipID.value : null;
 //   const stime = startTime.value ? startTime.value.getTime() : null;
 //   const etime = endTime.value ? endTime.value.getTime() : null;
 //   allTableData.value = filterTableData.value.filter((item) => {
@@ -471,7 +446,7 @@ function refreshPage() {
       width: 150px;
     }
   }
-  .sort {
+  .search {
     float: left;
     margin-left: 15px;
   }

@@ -110,11 +110,11 @@
 </template>
 
 <script setup lang="ts">
-import Sidebar from "../components/Sidebar.vue";
+import Sidebar from "../components/SideBar.vue";
 import Header from "../components/Header.vue";
-import { onMounted, ref, reactive } from "vue";
+import { onMounted, ref, reactive, watch } from "vue";
 // import axios from "../utils/http";
-import { useNow, useDateFormat } from "@vueuse/core";
+import { useNow, useDateFormat, useDark } from "@vueuse/core";
 
 import * as echarts from "echarts/core";
 import { GridComponent } from "echarts/components";
@@ -127,6 +127,8 @@ echarts.use([GridComponent, LineChart, CanvasRenderer, UniversalTransition]);
 const dialogTableVisible = ref(true);
 const chartContainer = ref(null);
 const timeNow = useDateFormat(useNow(), "YYYY-MM-DD HH:mm:ss");
+const isDark = useDark();
+const chartBg = ref("");
 
 //table內容
 const announcementData: any = reactive([
@@ -146,9 +148,14 @@ const orderData: any = reactive([
 
 //charts內容
 onMounted(() => {
-  var chartDom = document.getElementById("charts");
-  var myChart = echarts.init(chartDom);
+  let chartDom = document.getElementById("charts");
+  let myChart = echarts.init(chartDom);
   var option;
+  // if (isDark.value) {
+  //   chartBg.value = "#111";
+  // } else {
+  //   chartBg.value = "#fff";
+  // }
 
   option = {
     xAxis: {
@@ -177,6 +184,11 @@ onMounted(() => {
   };
 
   option && myChart.setOption(option);
+
+  watch(isDark, (newValue) => {
+    option && (option.backgroundColor = newValue ? "#111" : "#fff");
+    myChart.setOption(option);
+  });
 });
 </script>
 

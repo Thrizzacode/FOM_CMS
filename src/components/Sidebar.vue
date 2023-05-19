@@ -21,7 +21,7 @@
           <el-icon><icon-menu /></el-icon>
           <span>訂單管理</span>
         </el-menu-item>
-        <el-menu-item index="access">
+        <el-menu-item index="membership">
           <el-icon><UserFilled /></el-icon>
           <span>會員管理</span>
         </el-menu-item>
