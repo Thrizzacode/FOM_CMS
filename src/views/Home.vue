@@ -110,8 +110,8 @@
 </template>
 
 <script setup>
-import Sidebar from "@/components/Sidebar.vue";
-import Header from "@/components/Header.vue";
+import Sidebar from "../components/Sidebar.vue";
+import Header from "../components/Header.vue";
 import { onMounted, ref, reactive } from "vue";
 // import axios from "../utils/http";
 import { useNow, useDateFormat } from "@vueuse/core";
