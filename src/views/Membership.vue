@@ -141,8 +141,8 @@
 </template>
 
 <script setup>
-import Sidebar from "@/components/SideBar.vue";
-import Header from "@/components/Header.vue";
+import Sidebar from "../components/Sidebar.vue";
+import Header from "../components/Header.vue";
 import axios from "axios";
 // import axios from "../utils/http";
 import { ref, watchEffect } from "vue";
