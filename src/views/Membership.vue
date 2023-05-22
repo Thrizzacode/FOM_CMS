@@ -79,7 +79,7 @@
                   <el-button
                     size="small"
                     type="primary"
-                    @click="handleEdit(scope.row)"
+                    @click="editMemberConfirm(scope.row)"
                     >編輯</el-button
                   >
                   <el-button
@@ -121,7 +121,7 @@
                 <el-input v-model="memberForm.name" />
               </el-form-item>
               <el-form-item label="電話:" prop="phone">
-                <el-input v-model="memberForm.phone" />
+                <el-input v-model="memberForm.phone" maxlength="10" />
               </el-form-item>
               <el-form-item label="地址:" prop="address">
                 <el-input v-model="memberForm.address" />
@@ -137,6 +137,38 @@
                   >取消</el-button
                 >
                 <el-button type="primary" @click="addMember(ruleFromRef)">
+                  確認
+                </el-button>
+              </span>
+            </template>
+          </el-dialog>
+          <el-dialog v-model="editDialogVisible" title="修改會員" width="30%">
+            <el-form
+              ref="ruleFromRef"
+              :model="editIn"
+              :label-position="position"
+              :rules="rules"
+            >
+              <el-form-item label="會員姓名:" prop="name">
+                <el-input v-model="editIn.name" />
+              </el-form-item>
+              <el-form-item label="電話:" prop="phone">
+                <el-input v-model="editIn.phone" maxlength="10" />
+              </el-form-item>
+              <el-form-item label="地址:" prop="address">
+                <el-input v-model="editIn.address" />
+              </el-form-item>
+            </el-form>
+            <template #footer>
+              <span class="dialog-footer">
+                <el-button
+                  @click="
+                    editDialogVisible = false;
+                    resetInputForm(ruleFromRef);
+                  "
+                  >取消</el-button
+                >
+                <el-button type="primary" @click="editMember(ruleFromRef)">
                   確認
                 </el-button>
               </span>
@@ -183,14 +215,17 @@ import { Refresh } from "@element-plus/icons-vue";
 const position = ref("top");
 const tableData = ref([]);
 const addDialogVisible = ref(false);
-const deleteIn = ref({});
+const editDialogVisible = ref(false);
 const delDialogVisible = ref(false);
+const deleteIn = ref({});
+const editIn = ref({});
 const memberForm = reactive({
   name: "",
   phone: "",
   address: "",
 });
 
+//表單驗證
 const ruleFromRef = ref(null);
 const rules = reactive({
   name: [
@@ -224,6 +259,7 @@ const resetInputForm = (formEl) => {
   if (!formEl) return;
   formEl.resetFields();
 };
+
 //獲取會員資料
 const fetchMember = async () => {
   try {
@@ -236,7 +272,6 @@ const fetchMember = async () => {
     console.log(error);
   }
 };
-
 onMounted(fetchMember);
 
 //新增會員
@@ -251,7 +286,7 @@ const addMember = (formEl) => {
           import.meta.env.VITE_ADD_MEMBERSHIP_API,
           memberForm
         );
-        console.log(data);
+
         resetForm();
         resetData();
         addDialogVisible.value = false;
@@ -269,12 +304,33 @@ const addMember = (formEl) => {
   });
 };
 
-//確認是否刪除會員
-const delMemberConfirm = (row) => {
-  console.log(row);
-  delDialogVisible.value = true;
-  deleteIn.value = row;
-  console.log(deleteIn.value);
+//修改會員
+const editMember = (formEl) => {
+  if (!formEl) return;
+  formEl.validate(async (valid, fields) => {
+    if (valid) {
+      console.log("submit!");
+      try {
+        const { data } = await axios.put(
+          import.meta.env.VITE_EDIT_MEMBERSHIP_API,
+          editIn.value
+        );
+        console.log(data);
+        resetForm();
+        resetData();
+        editDialogVisible.value = false;
+        ElMessage({
+          type: "success",
+          message: "修改成功",
+        });
+      } catch (error) {
+        console.log(error);
+      }
+    } else {
+      console.log("error submit!", fields);
+      ElMessage.error("請輸入正確資料");
+    }
+  });
 };
 
 //刪除會員
@@ -293,6 +349,21 @@ const delMember = async (deleteIn) => {
   } catch (error) {
     console.log(error);
   }
+};
+
+//確認是否刪除會員
+const delMemberConfirm = (row) => {
+  console.log(row);
+  delDialogVisible.value = true;
+  deleteIn.value = row;
+  console.log(deleteIn.value);
+};
+
+const editMemberConfirm = (row) => {
+  console.log(row);
+  editDialogVisible.value = true;
+  editIn.value = row;
+  console.log(editIn.value);
 };
 
 //重置Form
