@@ -36,7 +36,7 @@
                 </el-form-item>
 
                 <el-form-item>
-                  <el-button type="success" @click="orderAdd"
+                  <el-button type="success" @click="addDialogVisible = true"
                     >新增會員</el-button
                   >
                 </el-form-item>
@@ -85,7 +85,7 @@
                   <el-button
                     size="small"
                     type="danger"
-                    @click="handleDelete(scope.row)"
+                    @click="delMemberConfirm(scope.row)"
                     >刪除</el-button
                   >
                 </template>
@@ -110,9 +110,41 @@
               </el-col>
             </el-row>
           </div>
+          <el-dialog v-model="addDialogVisible" title="新增會員" width="30%">
+            <el-form
+              ref="ruleFromRef"
+              :model="memberForm"
+              :label-position="position"
+              :rules="rules"
+            >
+              <el-form-item label="會員姓名:" prop="name">
+                <el-input v-model="memberForm.name" />
+              </el-form-item>
+              <el-form-item label="電話:" prop="phone">
+                <el-input v-model="memberForm.phone" />
+              </el-form-item>
+              <el-form-item label="地址:" prop="address">
+                <el-input v-model="memberForm.address" />
+              </el-form-item>
+            </el-form>
+            <template #footer>
+              <span class="dialog-footer">
+                <el-button
+                  @click="
+                    addDialogVisible = false;
+                    resetInputForm(ruleFromRef);
+                  "
+                  >取消</el-button
+                >
+                <el-button type="primary" @click="addMember(ruleFromRef)">
+                  確認
+                </el-button>
+              </span>
+            </template>
+          </el-dialog>
           <el-dialog
             ref="dialog"
-            v-model="centerDialogVisible"
+            v-model="delDialogVisible"
             title="注意刪除後不可回復"
             width="30%"
             align-center
@@ -120,13 +152,12 @@
             <span>請再次確認是否要刪除</span>
             <template #footer>
               <span class="dialog-footer">
-                <el-button @click="centerDialogVisible = false">取消</el-button>
+                <el-button @click="delDialogVisible = false">取消</el-button>
                 <el-button
                   type="primary"
                   @click="
-                    handleDeleteIn(deleteIn);
-                    getProfiles();
-                    centerDialogVisible = false;
+                    delMember(deleteIn);
+                    delDialogVisible = false;
                   "
                 >
                   刪除
@@ -145,13 +176,134 @@ import Sidebar from "../components/Sidebar.vue";
 import Header from "../components/Header.vue";
 import axios from "axios";
 // import axios from "../utils/http";
-import { ref, onMounted, watchEffect, toRefs } from "vue";
+import { ref, reactive, onMounted } from "vue";
 import { ElMessage } from "element-plus";
 import { Refresh } from "@element-plus/icons-vue";
 
+const position = ref("top");
 const tableData = ref([]);
+const addDialogVisible = ref(false);
+const deleteIn = ref({});
+const delDialogVisible = ref(false);
+const memberForm = reactive({
+  name: "",
+  phone: "",
+  address: "",
+});
 
+const ruleFromRef = ref(null);
+const rules = reactive({
+  name: [
+    {
+      required: true,
+      message: "請輸入會員姓名",
+      trigger: "blur",
+    },
+  ],
+  phone: [
+    {
+      required: true,
+      message: "請輸入電話",
+      trigger: "blur",
+    },
+    {
+      pattern: /^[0][9][0-9]{8}$/,
+      trigger: ["blur", "change"],
+      message: "請輸入09開頭的正確電話號碼",
+    },
+  ],
+  address: [
+    {
+      required: true,
+      message: "請輸入地址",
+      trigger: "blur",
+    },
+  ],
+});
+const resetInputForm = (formEl) => {
+  if (!formEl) return;
+  formEl.resetFields();
+};
+//獲取會員資料
 const fetchMember = async () => {
+  try {
+    const { data } = await axios.get(import.meta.env.VITE_GET_MEMBERSHIP_API);
+    console.log(data);
+    tableData.value = data;
+    console.log(tableData.value);
+    // setPageinations();
+  } catch (error) {
+    console.log(error);
+  }
+};
+
+onMounted(fetchMember);
+
+//新增會員
+const addMember = (formEl) => {
+  if (!formEl) return;
+  formEl.validate(async (valid, fields) => {
+    if (valid) {
+      console.log("submit!");
+      try {
+        console.log(memberForm);
+        const { data } = await axios.post(
+          import.meta.env.VITE_ADD_MEMBERSHIP_API,
+          memberForm
+        );
+        console.log(data);
+        resetForm();
+        resetData();
+        addDialogVisible.value = false;
+        ElMessage({
+          type: "success",
+          message: "新增成功",
+        });
+      } catch (error) {
+        console.log(error);
+      }
+    } else {
+      console.log("error submit!", fields);
+      ElMessage.error("請輸入正確資料");
+    }
+  });
+};
+
+//確認是否刪除會員
+const delMemberConfirm = (row) => {
+  console.log(row);
+  delDialogVisible.value = true;
+  deleteIn.value = row;
+  console.log(deleteIn.value);
+};
+
+//刪除會員
+const delMember = async (deleteIn) => {
+  console.log(deleteIn);
+  try {
+    const { data } = await axios.delete(
+      `${import.meta.env.VITE_DELETE_MEMBERSHIP_API}${deleteIn.id}`
+    );
+    console.log(data);
+    resetData();
+    ElMessage({
+      type: "success",
+      message: "刪除成功",
+    });
+  } catch (error) {
+    console.log(error);
+  }
+};
+
+//重置Form
+const resetForm = () => {
+  memberForm.name = "";
+  memberForm.phone = "";
+  memberForm.address = "";
+};
+
+//重置資料
+const resetData = async () => {
   try {
     const { data } = await axios.get(import.meta.env.VITE_GET_MEMBERSHIP_API);
     console.log(data);
@@ -163,8 +315,11 @@ const fetchMember = async () => {
   }
 };
 
-onMounted(fetchMember);
-
+//重新整理table
+const refreshPage = () => {
+  resetData();
+  console.log("done");
+};
 //分頁配置設定
 const page_index = ref(1), //現在在哪裡一頁
   page_size = ref(5), //一頁有多少條
@@ -375,15 +530,6 @@ const sort = () => {
 //     link.click();
 //   });
 // };
-
-//重新整理table
-function refreshPage() {
-  while (tableData.value.length) {
-    tableData.value.pop();
-  }
-  // getProfiles();
-  console.log("done");
-}
 </script>
 
 <style lang="scss" scoped>
