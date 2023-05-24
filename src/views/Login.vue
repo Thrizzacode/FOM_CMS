@@ -38,13 +38,14 @@ import { reactive } from "vue";
 import { useRouter } from "vue-router";
 import { ElMessage } from "element-plus";
 import axios from "axios";
+import { useAuthStore } from "../stores/auth";
 // import jwt_decode from "jwt-decode";
 // import axios from "../utils/http";
 // import { useAuthStore } from "../store";
 // import { userType } from "../utils/types";
 
 const router = useRouter();
-// const store = useAuthStore();
+const store = useAuthStore();
 
 const user = reactive({
   username: "",
@@ -54,21 +55,19 @@ const user = reactive({
 const login = async (e) => {
   try {
     e.preventDefault();
-    await axios
-      .post(import.meta.env.VITE_LOGIN_API, {
-        username: user.username,
-        password: user.password,
-      })
-      .then((res) => {
-        console.log(res.data);
-        if (res.data.status === 200) {
-          ElMessage({
-            message: "登錄成功.",
-            type: "success",
-          });
-          router.push("/home");
-        }
-      });
+    const { data } = await axios.post(import.meta.env.VITE_GET_TOKEN_API, user);
+    localStorage.setItem("token", data.token);
+    console.log(data.token);
+    await axios.post(import.meta.env.VITE_LOGIN_API, user).then((res) => {
+      console.log(res.data);
+      if (res.data.status === 200) {
+        ElMessage({
+          message: "登錄成功.",
+          type: "success",
+        });
+        router.push("/home");
+      }
+    });
   } catch (error) {
     console.log(error);
     ElMessage({
@@ -76,38 +75,16 @@ const login = async (e) => {
       type: "error",
     });
   }
+  console.log(localStorage.getItem("token"));
+  const { data: tokenData } = await axios.post(
+    import.meta.env.VITE_PARSE_TOKEN_API,
+    {
+      token: localStorage.getItem("token"),
+    }
+  );
+  store.setUserName(tokenData.username);
+  console.log(tokenData);
 };
-
-// console.log(import.meta.env.VITE_TEST); //登入api
-// const getLoginApi = async () => {
-//   try {
-//     await axios
-//       .post(import.meta.env.VITE_GET_LOGIN_API, {
-//         username: user.username,
-//         password: user.password,
-//       })
-//       .then((res) => {
-//         const { token } = res.data;
-//         //存到localStorage
-//         localStorage.setItem("loginToken", token);
-//         ElMessage({
-//           message: "登录成功.",
-//           type: "success",
-//         });
-//         //token 處理
-//         const decoded: userType = jwt_decode(token);
-//         // console.log(decoded);
-//         store.setAuth(!!decoded);
-//         store.setUser(decoded);
-//         if (res.data.success === true) {
-//           router.push("/home");
-//         }
-//         // console.log(res.data.success);
-//       });
-//   } catch (error) {
-//     console.log(error);
-//   }
-// };
 </script>
 
 <style lang="scss" scoped>

@@ -206,12 +206,10 @@
 <script setup>
 import Sidebar from "../components/Sidebar.vue";
 import Header from "../components/Header.vue";
-import axios from "axios";
-// import axios from "../utils/http";
+import axios from "../config/axiosConfig.js";
 import { ref, reactive, onMounted } from "vue";
 import { ElMessage } from "element-plus";
 import { Refresh } from "@element-plus/icons-vue";
-
 const position = ref("top");
 const tableData = ref([]);
 const addDialogVisible = ref(false);

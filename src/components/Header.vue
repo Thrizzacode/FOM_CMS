@@ -18,16 +18,13 @@
 <script setup lang="ts">
 import { User } from "@element-plus/icons-vue";
 import { ArrowDownBold } from "@element-plus/icons-vue";
-// import { useAuthStore } from "../store";
-import { useRouter } from "vue-router";
+import { useAuthStore } from "../stores/auth";
 import { storeToRefs } from "pinia";
+import { useRouter } from "vue-router";
 
-// const users = useAuthStore();
-// const { user } = storeToRefs(users);
-// const store = useAuthStore();
-// const router = useRouter();
-// const userName = user.value.name;
-const userName = "test";
+const store = useAuthStore();
+const { userName } = storeToRefs(store);
+const router = useRouter();
 
 //下拉選單
 const handleDropdown = (item: String) => {
@@ -44,10 +41,10 @@ const handleDropdown = (item: String) => {
 const showUserInfo = () => {};
 //登出按鈕
 const logout = () => {
-  localStorage.removeItem("loginToken");
+  localStorage.removeItem("token");
+  router.push("/login");
   // store.setAuth(false);
   // store.setUser(null);
-  // router.push("/login");
 };
 </script>
 <style lang="scss">
