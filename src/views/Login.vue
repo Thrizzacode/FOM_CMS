@@ -1,7 +1,7 @@
 <template>
   <div class="main">
     <div class="container b-container" id="b-container">
-      <form class="form" id="b-form" method="" action="">
+      <form class="form" id="b-form">
         <h2 class="form_title title">Welcome to FOM</h2>
         <input
           class="form__input"
@@ -15,7 +15,10 @@
           type="password"
           placeholder="Password"
         />
-        <button class="form__button button" @click="login">SIGN IN</button>
+        <el-row style="margin-top: 30px">
+          <button class="form__button button" @click="login">LOGIN</button>
+          <button class="form__button button" @click="signUp">SIGN UP</button>
+        </el-row>
       </form>
     </div>
     <div class="switch" id="switch-cnt">
@@ -30,11 +33,46 @@
         {{ user.password }}
       </div>
     </div>
+    <el-dialog v-model="signUpDialogVisible" title="註冊會員" width="30%">
+      <el-form
+        ref="ruleFromRef"
+        :model="signUpForm"
+        :label-position="position"
+        :rules="rules"
+      >
+        <el-form-item label="會員ID:" prop="id">
+          <el-input v-model="signUpForm.id" />
+        </el-form-item>
+        <el-form-item label="會員帳號:" prop="username">
+          <el-input v-model="signUpForm.username" />
+        </el-form-item>
+        <el-form-item label="會員密碼:" prop="password">
+          <el-input type="password" v-model="signUpForm.password" />
+        </el-form-item>
+        <el-form-item label="權限:" prop="identity">
+          <el-input v-model="signUpForm.identity" />
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <span class="dialog-footer">
+          <el-button
+            @click="
+              editDialogVisible = false;
+              resetInputForm(ruleFromRef);
+            "
+            >取消</el-button
+          >
+          <el-button type="primary" @click="editMember(ruleFromRef)">
+            確認
+          </el-button>
+        </span>
+      </template>
+    </el-dialog>
   </div>
 </template>
 
 <script setup>
-import { reactive } from "vue";
+import { reactive, ref } from "vue";
 import { useRouter } from "vue-router";
 import { ElMessage } from "element-plus";
 import axios from "axios";
@@ -46,10 +84,18 @@ import { useAuthStore } from "../stores/auth";
 
 const router = useRouter();
 const store = useAuthStore();
+const signUpDialogVisible = ref(false);
 
 const user = reactive({
   username: "",
   password: "",
+});
+
+const signUpForm = reactive({
+  id: "",
+  username: "",
+  password: "",
+  identity: {},
 });
 
 const login = async (e) => {
@@ -84,6 +130,11 @@ const login = async (e) => {
   );
   store.setUserName(tokenData.username);
   console.log(tokenData);
+};
+
+const signUp = (e) => {
+  e.preventDefault();
+  signUpDialogVisible.value = true;
 };
 </script>
 
@@ -236,6 +287,8 @@ body {
   font-weight: 700;
   font-size: 14px;
   letter-spacing: 1.15px;
+
+  margin: 0 10px;
 
   background-color: $purple;
   color: $white;
