@@ -40,9 +40,6 @@
         :label-position="position"
         :rules="rules"
       >
-        <el-form-item label="會員ID:" prop="id">
-          <el-input v-model="signUpForm.id" />
-        </el-form-item>
         <el-form-item label="會員帳號:" prop="username">
           <el-input v-model="signUpForm.username" />
         </el-form-item>
@@ -50,19 +47,34 @@
           <el-input type="password" v-model="signUpForm.password" />
         </el-form-item>
         <el-form-item label="權限:" prop="identity">
-          <el-input v-model="signUpForm.identity" />
+          <!-- <el-input v-model="signUpForm.identity" /> -->
+          <el-select
+            v-model="signUpForm.identity"
+            class="m-2"
+            placeholder="請選擇權限"
+            size="large"
+            multiple
+            style="width: 300px"
+          >
+            <el-option
+              v-for="item in options"
+              :key="item.value"
+              :label="item.label"
+              :value="item.value"
+            />
+          </el-select>
         </el-form-item>
       </el-form>
       <template #footer>
         <span class="dialog-footer">
           <el-button
             @click="
-              editDialogVisible = false;
-              resetInputForm(ruleFromRef);
+              signUpDialogVisible = false;
+              resetForm();
             "
             >取消</el-button
           >
-          <el-button type="primary" @click="editMember(ruleFromRef)">
+          <el-button type="primary" @click="signUpConfirm(ruleFromRef)">
             確認
           </el-button>
         </span>
@@ -77,14 +89,12 @@ import { useRouter } from "vue-router";
 import { ElMessage } from "element-plus";
 import axios from "axios";
 import { useAuthStore } from "../stores/auth";
-// import jwt_decode from "jwt-decode";
-// import axios from "../utils/http";
-// import { useAuthStore } from "../store";
-// import { userType } from "../utils/types";
 
 const router = useRouter();
 const store = useAuthStore();
 const signUpDialogVisible = ref(false);
+const selectValue = ref([]);
+const position = ref("top");
 
 const user = reactive({
   username: "",
@@ -92,11 +102,25 @@ const user = reactive({
 });
 
 const signUpForm = reactive({
-  id: "",
   username: "",
   password: "",
-  identity: {},
+  identity: [],
 });
+
+const options = [
+  {
+    value: "ADMIN",
+    label: "管理員",
+  },
+  {
+    value: "NORMAL",
+    label: "一般使用者",
+  },
+  {
+    value: "TS",
+    label: "技術人員",
+  },
+];
 
 const login = async (e) => {
   try {
@@ -135,6 +159,32 @@ const login = async (e) => {
 const signUp = (e) => {
   e.preventDefault();
   signUpDialogVisible.value = true;
+};
+
+const signUpConfirm = async () => {
+  console.log(signUpForm);
+  await axios.post(import.meta.env.VITE_SIGNUP_API, signUpForm).then((res) => {
+    console.log(res);
+    if (res.status === 201) {
+      ElMessage({
+        message: "註冊成功.",
+        type: "success",
+      });
+    } else {
+      ElMessage({
+        message: "註冊失敗.",
+        type: "error",
+      });
+    }
+    signUpDialogVisible.value = false;
+    resetForm();
+  });
+};
+
+const resetForm = () => {
+  signUpForm.username = "";
+  signUpForm.password = "";
+  signUpForm.identity = [];
 };
 </script>
 
@@ -406,5 +456,12 @@ body {
   50% {
     width: 500px;
   }
+}
+//identity select dropdown style
+.el-select-dropdown__item {
+  padding: 0 20px;
+}
+.el-button {
+  padding: 8px 15px;
 }
 </style>
