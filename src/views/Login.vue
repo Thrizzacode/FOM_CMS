@@ -40,11 +40,14 @@
         :label-position="position"
         :rules="rules"
       >
-        <el-form-item label="會員帳號:" prop="username">
+        <el-form-item label="使用者帳號:" prop="username">
           <el-input v-model="signUpForm.username" />
         </el-form-item>
-        <el-form-item label="會員密碼:" prop="password">
+        <el-form-item label="使用者密碼:" prop="password">
           <el-input type="password" v-model="signUpForm.password" />
+        </el-form-item>
+        <el-form-item label="使用者信箱:" prop="email">
+          <el-input v-model="signUpForm.email" />
         </el-form-item>
         <el-form-item label="權限:" prop="identity">
           <!-- <el-input v-model="signUpForm.identity" /> -->
@@ -89,11 +92,11 @@ import { useRouter } from "vue-router";
 import { ElMessage } from "element-plus";
 import axios from "axios";
 import { useAuthStore } from "../stores/auth";
+import { aw } from "../../dist/assets/@vue-bae61ee8";
 
 const router = useRouter();
 const store = useAuthStore();
 const signUpDialogVisible = ref(false);
-const selectValue = ref([]);
 const position = ref("top");
 
 const user = reactive({
@@ -104,6 +107,7 @@ const user = reactive({
 const signUpForm = reactive({
   username: "",
   password: "",
+  email: "",
   identity: [],
 });
 
@@ -179,6 +183,30 @@ const signUpConfirm = async () => {
     signUpDialogVisible.value = false;
     resetForm();
   });
+  try {
+    await axios
+      .post(import.meta.env.VITE_SENDMAIL_API, {
+        subject: "註冊通知",
+        content: "恭喜你成功註冊帳號",
+        receivers: [signUpForm.email],
+      })
+      .then((res) => {
+        console.log(res);
+        if (res.status === 200) {
+          ElMessage({
+            message: "寄送成功.",
+            type: "success",
+          });
+        } else {
+          ElMessage({
+            message: "寄送失敗.",
+            type: "error",
+          });
+        }
+      });
+  } catch (error) {
+    console.log(error);
+  }
 };
 
 const resetForm = () => {
