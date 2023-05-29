@@ -92,7 +92,6 @@ import { useRouter } from "vue-router";
 import { ElMessage } from "element-plus";
 import axios from "axios";
 import { useAuthStore } from "../stores/auth";
-import { aw } from "../../dist/assets/@vue-bae61ee8";
 
 const router = useRouter();
 const store = useAuthStore();
@@ -192,7 +191,7 @@ const signUpConfirm = async () => {
       })
       .then((res) => {
         console.log(res);
-        if (res.status === 200) {
+        if (res.status === 204) {
           ElMessage({
             message: "寄送成功.",
             type: "success",
