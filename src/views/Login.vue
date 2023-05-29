@@ -50,7 +50,6 @@
           <el-input v-model="signUpForm.email" />
         </el-form-item>
         <el-form-item label="權限:" prop="identity">
-          <!-- <el-input v-model="signUpForm.identity" /> -->
           <el-select
             v-model="signUpForm.identity"
             class="m-2"
@@ -180,11 +179,11 @@ const signUpConfirm = async () => {
       });
     }
     signUpDialogVisible.value = false;
-    resetForm();
   });
   try {
     await axios
       .post(import.meta.env.VITE_SENDMAIL_API, {
+        name: signUpForm.username,
         subject: "註冊通知",
         content: "恭喜你成功註冊帳號",
         receivers: [signUpForm.email],
@@ -206,6 +205,7 @@ const signUpConfirm = async () => {
   } catch (error) {
     console.log(error);
   }
+  resetForm();
 };
 
 const resetForm = () => {
