@@ -47,7 +47,20 @@
           <el-input type="password" v-model="signUpForm.password" />
         </el-form-item>
         <el-form-item label="使用者信箱:" prop="email">
-          <el-input v-model="signUpForm.email" />
+          <el-input v-model="signUpForm.email">
+            <template #append>
+              <el-button @click="getVerifyCode()" :disabled="isButtonDisabled">
+                {{ verifyButton }}
+              </el-button>
+            </template>
+          </el-input>
+        </el-form-item>
+        <el-form-item
+          v-if="verifyCodeSended"
+          label="請輸入6位數驗證碼:"
+          prop="verifyCode"
+        >
+          <el-input v-model="signUpForm.verifyCode"> </el-input>
         </el-form-item>
         <el-form-item label="權限:" prop="identity">
           <el-select
@@ -94,7 +107,10 @@ import { useAuthStore } from "../stores/auth";
 
 const router = useRouter();
 const store = useAuthStore();
+const verifyButton = ref("獲取驗證碼");
+const isButtonDisabled = ref(false);
 const signUpDialogVisible = ref(false);
+const verifyCodeSended = ref(false);
 const position = ref("top");
 
 const user = reactive({
@@ -107,6 +123,7 @@ const signUpForm = reactive({
   password: "",
   email: "",
   identity: [],
+  verifyCode: "",
 });
 
 const options = [
@@ -124,6 +141,7 @@ const options = [
   },
 ];
 
+//登入
 const login = async (e) => {
   try {
     e.preventDefault();
@@ -163,6 +181,48 @@ const signUp = (e) => {
   signUpDialogVisible.value = true;
 };
 
+//獲取驗證碼
+const getVerifyCode = async () => {
+  try {
+    await axios
+      .post(import.meta.env.VITE_GET_VERIFYCODE_API, {
+        name: signUpForm.username,
+        subject: "註冊驗證碼",
+        receivers: [signUpForm.email],
+      })
+      .then((res) => {
+        console.log(res);
+        if (res.status === 204) {
+          verifyCodeSended.value = true;
+          isButtonDisabled.value = true;
+          let time = 10;
+          let clock = setInterval(() => {
+            verifyButton.value = time + "秒後重新獲取";
+            time--;
+            if (time < 0) {
+              clearInterval(clock);
+              verifyButton.value = "重新獲取驗證碼";
+              isButtonDisabled.value = false;
+              time = 10;
+            }
+          }, 1000);
+          ElMessage({
+            message: "驗證碼發送成功",
+            type: "success",
+          });
+        } else {
+          ElMessage({
+            message: "驗證碼發送失敗",
+            type: "error",
+          });
+        }
+      });
+  } catch (error) {
+    console.log(error);
+  }
+};
+
+//註冊
 const signUpConfirm = async () => {
   console.log(signUpForm);
   await axios.post(import.meta.env.VITE_SIGNUP_API, signUpForm).then((res) => {
@@ -184,8 +244,7 @@ const signUpConfirm = async () => {
     await axios
       .post(import.meta.env.VITE_SENDMAIL_API, {
         name: signUpForm.username,
-        subject: "註冊通知",
-        content: "恭喜你成功註冊帳號",
+        subject: "註冊驗證碼通知",
         receivers: [signUpForm.email],
       })
       .then((res) => {
