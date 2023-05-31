@@ -224,27 +224,31 @@ const getVerifyCode = async () => {
 
 //註冊
 const signUpConfirm = async () => {
-  console.log(signUpForm);
-  await axios.post(import.meta.env.VITE_SIGNUP_API, signUpForm).then((res) => {
-    console.log(res);
-    if (res.status === 201) {
-      ElMessage({
-        message: "註冊成功.",
-        type: "success",
-      });
-    } else {
-      ElMessage({
-        message: "註冊失敗.",
-        type: "error",
-      });
-    }
-    signUpDialogVisible.value = false;
-  });
   try {
+    console.log(signUpForm);
+    await axios
+      .post(import.meta.env.VITE_SIGNUP_API, signUpForm)
+      .then((res) => {
+        console.log(res);
+        if (res.status === 201) {
+          ElMessage({
+            message: "註冊成功.",
+            type: "success",
+          });
+        }
+        signUpDialogVisible.value = false;
+      })
+      .catch((err) => {
+        console.log(err);
+        ElMessage({
+          message: "註冊失敗.",
+          type: "error",
+        });
+      });
     await axios
       .post(import.meta.env.VITE_SENDMAIL_API, {
         name: signUpForm.username,
-        subject: "註冊驗證碼通知",
+        subject: "註冊成功通知",
         receivers: [signUpForm.email],
       })
       .then((res) => {
@@ -254,15 +258,14 @@ const signUpConfirm = async () => {
             message: "寄送成功.",
             type: "success",
           });
-        } else {
-          ElMessage({
-            message: "寄送失敗.",
-            type: "error",
-          });
         }
       });
   } catch (error) {
     console.log(error);
+    ElMessage({
+      message: "寄送失敗.",
+      type: "error",
+    });
   }
   resetForm();
 };
@@ -271,6 +274,8 @@ const resetForm = () => {
   signUpForm.username = "";
   signUpForm.password = "";
   signUpForm.identity = [];
+  signUpForm.email = "";
+  signUpForm.verifyCode = "";
 };
 </script>
 
