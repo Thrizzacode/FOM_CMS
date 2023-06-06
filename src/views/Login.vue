@@ -195,15 +195,15 @@ const getVerifyCode = async () => {
         if (res.status === 204) {
           verifyCodeSended.value = true;
           isButtonDisabled.value = true;
-          let time = 10;
+          let time = 60;
           let clock = setInterval(() => {
-            verifyButton.value = time + "秒後重新獲取";
+            verifyButton.value = `${time}秒後重新獲取`;
             time--;
             if (time < 0) {
               clearInterval(clock);
               verifyButton.value = "重新獲取驗證碼";
               isButtonDisabled.value = false;
-              time = 10;
+              time = 60;
             }
           }, 1000);
           ElMessage({
