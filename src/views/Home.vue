@@ -8,7 +8,7 @@
           <el-scrollbar>
             <h1 class="homeTitle">歡迎進入FOM CSM</h1>
             <h2>現在時間: {{ timeNow }}</h2>
-            <el-row style="width: 100%; height: 220px">
+            <el-row style="width: 100%; height: 500px">
               <el-col :span="12" style="padding-top: 50px">
                 <el-row justify="center">
                   <el-col :span="8" class="center">
@@ -32,7 +32,7 @@
                   </el-col>
                 </el-row>
               </el-col>
-              <el-col :span="12">
+              <el-col :span="12" style="height: 500px">
                 <h1 class="homeTitle2">最新公告内容</h1>
                 <div class="homeList">
                   <el-table :data="announcementData" border>
@@ -113,7 +113,7 @@
 import Sidebar from "../components/Sidebar.vue";
 import Header from "../components/Header.vue";
 import { onMounted, ref, reactive } from "vue";
-// import axios from "../utils/http";
+import axios from "../config/axiosConfig.js";
 import { useNow, useDateFormat } from "@vueuse/core";
 
 import * as echarts from "echarts/core";
@@ -127,14 +127,24 @@ echarts.use([GridComponent, LineChart, CanvasRenderer, UniversalTransition]);
 const dialogTableVisible = ref(true);
 const chartContainer = ref(null);
 const timeNow = useDateFormat(useNow(), "YYYY-MM-DD HH:mm:ss");
+const announcementData = ref([]);
 
 //table內容
-const announcementData = reactive([
-  {
-    date: "2023-05-17",
-    content: "This is a test",
-  },
-]);
+//取得前10筆公告
+const getAnnouncement = async () => {
+  const { data } = await axios.get(import.meta.env.VITE_GET_ANNOUNCEMENT_API, {
+    params: {
+      page: 0,
+      size: 5,
+      sort: "date,desc",
+    },
+  });
+  announcementData.value = data.content;
+  console.log(data);
+};
+onMounted(() => {
+  getAnnouncement();
+});
 const orderData = reactive([
   {
     orderNumber: "FOM20230517",

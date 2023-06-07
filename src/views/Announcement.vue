@@ -49,7 +49,7 @@
               />
               <el-table-column align="center" prop="content" label="公告內容" />
               <el-table-column
-                width="100"
+                width="120"
                 align="center"
                 prop="publisher"
                 label="公告人"
@@ -248,7 +248,7 @@ const fetchAnnouncement = async () => {
     const { data } = await axios.get(
       `${import.meta.env.VITE_GET_ANNOUNCEMENT_API}?page=${
         page_index.value - 1
-      }&size=${page_size.value}&sort=announcementid,desc`,
+      }&size=${page_size.value}&sort=date,desc`,
       pageable
     );
     console.log(data);
@@ -262,20 +262,8 @@ const fetchAnnouncement = async () => {
   }
 };
 
-const fetchAnnouncementCount = async () => {
-  try {
-    const { data } = await axios.get(
-      import.meta.env.VITE_GET_ANNOUNCEMENT_COUNT_API
-    );
-    total.value = data;
-  } catch (error) {
-    console.log(error);
-  }
-};
-
 onMounted(() => {
   fetchAnnouncement();
-  fetchAnnouncementCount();
 });
 
 //新增公告
@@ -348,7 +336,7 @@ const delAnnouncement = async (deleteIn) => {
       }`
     );
     console.log(data);
-    resetData();
+    fetchAnnouncement();
     ElMessage({
       type: "success",
       message: "刪除成功",
@@ -382,60 +370,6 @@ const resetForm = () => {
 //重新整理table
 const refreshPage = () => {
   fetchAnnouncement();
-};
-
-//查詢功能設定
-const startTime = ref();
-const endTime = ref();
-const productTypeValue = ref();
-const statusValue = ref();
-const membershipID = ref();
-
-//查詢按鈕
-const sort = () => {
-  if (
-    !startTime.value &&
-    !endTime.value &&
-    !productTypeValue.value &&
-    !statusValue.value &&
-    !membershipID.value
-  ) {
-    ElMessage({
-      type: "warning",
-      message: "請選擇要查詢條件",
-    });
-    // getProfiles();
-    return;
-  } else if (
-    (!startTime.value && endTime.value) ||
-    (startTime.value && !endTime.value)
-  ) {
-    ElMessage({
-      type: "error",
-      message: "選擇開始查詢時間就要選擇結束時間",
-    });
-    // getProfiles();
-    return;
-  }
-  //多條件選擇
-  const ptvalue = productTypeValue.value ? productTypeValue.value : null;
-  const caseStatus = statusValue.value ? statusValue.value : null;
-  const serialNum = membershipID.value ? membershipID.value : null;
-  const stime = startTime.value ? startTime.value.getTime() : null;
-  const etime = endTime.value ? endTime.value.getTime() : null;
-  allTableData.value = filterTableData.value.filter((item) => {
-    let date = new Date(item.date);
-    let time = date.getTime();
-    return (
-      (stime ? time >= stime : true) &&
-      (etime ? time <= etime : true) &&
-      (ptvalue ? item.productType === ptvalue : true) &&
-      (caseStatus ? item.caseStatus === caseStatus : true) &&
-      (serialNum ? item.caseNumber === serialNum : true)
-    );
-  }); //
-  //選擇後數據重新分頁
-  setPageinations();
 };
 </script>
 
