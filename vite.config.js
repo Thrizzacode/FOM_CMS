@@ -15,7 +15,7 @@ export default defineConfig({
       "@": fileURLToPath(new URL("./src", import.meta.url)),
     },
   },
-  base: "/FOM_CMS/",
+  base: "./",
   build: {
     chunkSizeWarningLimit: 1000,
     rollupOptions: {
